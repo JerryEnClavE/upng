@@ -1021,7 +1021,7 @@ upng_error upng_decode(upng_t* upng)
 		}
 
 		/* get pointer to payload */
-		data = chunk + 8;
+		// const unsigned char *data = chunk + 8; // Eliminar esta línea
 
 		/* parse chunks */
 		if (upng_chunk_type(chunk) == CHUNK_IDAT) {
@@ -1186,7 +1186,12 @@ upng_t* upng_new_from_file(const char *filename)
 		SET_ERROR(upng, UPNG_ENOMEM);
 		return upng;
 	}
-	fread(buffer, 1, (unsigned long)size, file);
+	if (fread(buffer, 1, (unsigned long)size, file) != (unsigned long)size) {
+		fclose(file);
+		free(buffer);
+		SET_ERROR(upng, UPNG_EUNFORMAT);
+		return upng;
+	}
 	fclose(file);
 
 	/* set the read buffer as our source buffer, with owning flag set */
